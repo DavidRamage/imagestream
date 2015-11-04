@@ -10,7 +10,7 @@ PKT_STRUCT = struct.Struct("> B l I H 457s")
 sock.bind((HOST, PORT))
 file_out = open("udp_rx.jpg", "wb")
 while True:
-    (last_pkt, crc_32, seq_num, bytes_sent, payload) =\
+    (last_pkt, CRC_32, seq_num, bytes_sent, payload) =\
         PKT_STRUCT.unpack(sock.recvfrom(512)[0])
     for byte in payload:
         file_out.write(byte)
