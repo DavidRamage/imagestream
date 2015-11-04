@@ -6,6 +6,7 @@ from io import BytesIO
 import struct
 import binascii
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_BROADCAST
+import time
 
 CAMERA = Camera()
 IMG_SIZE = 0
@@ -45,12 +46,14 @@ if __name__ == "__main__":
     sock = socket(AF_INET, SOCK_DGRAM, 0)
     sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
     sock.connect(('255.255.255.255', 31337))
-    file_buf = get_image()
-    byte_arrays = get_image_chunks(file_buf)
-    count = 0
-    for byte_array in byte_arrays:
-        last_pkt = 0
-        if count == len(byte_arrays) - 1:
-            last_pkt = 1
-        sock.send(get_packet(last_pkt, count, IMG_SIZE, byte_array))
-        count += 1
+    while True:
+        file_buf = get_image()
+        byte_arrays = get_image_chunks(file_buf)
+        count = 0
+        for byte_array in byte_arrays:
+            last_pkt = 0
+            if count == len(byte_arrays) - 1:
+                last_pkt = 1
+            sock.send(get_packet(last_pkt, count, IMG_SIZE, byte_array))
+            count += 1
+        time.sleep(1)
