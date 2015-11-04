@@ -5,11 +5,15 @@ import struct
 import time
 from io import BytesIO
 import binascii
+import syslog
 SOCK = socket(AF_INET, SOCK_DGRAM)
 HOST = '255.255.255.255'
 PORT = 31337
 PKT_STRUCT = struct.Struct("> B l I H 457s")
-SOCK.bind((HOST, PORT))
+try:
+    SOCK.bind((HOST, PORT))
+except Exception as ex:
+    syslog.syslog(syslog.LOG_ERR, "Unable to bind to socket due to %s" % str(ex))
 BAD_PACKET = False
 next_packet = 0
 while True:
@@ -20,8 +24,10 @@ while True:
         img_buffer = BytesIO()
     if next_packet != seq_num:
         BAD_PACKET = True
+        syslog.syslog(syslog.LOG_DEBUG, "Missed packet sequence number")
     if binascii.crc32(payload) != CRC_32:
         BAD_PACKET = True
+        syslog.syslog(syslog.LOG_DEBUG, "Bad payload CRC in packet")
     if BAD_PACKET == False:
         for byte in payload:
             img_buffer.write(byte)

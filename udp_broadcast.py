@@ -7,6 +7,7 @@ import struct
 import binascii
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_BROADCAST
 import time
+import syslog
 
 CAMERA = Camera()
 IMG_SIZE = 0
@@ -15,7 +16,11 @@ def get_image():
     """Get an image from CAMERA and return a BytesIO object comtaining the
     image as a jpeg."""
     img_buffer = BytesIO()
-    image = CAMERA.getImage()
+    try:
+        image = CAMERA.getImage()
+    except Exception as ex:
+        syslog.syslog(syslog.LOG_ERR,
+        "Unable to grab image from camera due to %s" % str(ex))
     image.save(img_buffer)
     return img_buffer.getvalue()
 
@@ -38,8 +43,11 @@ def get_image_chunks(byte_str):
 def get_packet(last_pkt, seq_num, bytes_sent, payload):
     """build a packet"""
     pkt_struct = struct.Struct("> B l I H 457s")
-    return pkt_struct.pack(last_pkt, binascii.crc32(payload), seq_num,
-        bytes_sent, payload)
+    try:
+        return pkt_struct.pack(last_pkt, binascii.crc32(payload), seq_num,
+            bytes_sent, payload)
+    except Exception as ex:
+        syslog.syslog(syslog.LOG_ERR, "Unable to send packet due to %s" % str(ex))
 
 
 if __name__ == "__main__":
