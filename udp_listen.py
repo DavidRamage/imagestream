@@ -29,8 +29,8 @@ while True:
         BAD_PACKET = True
         syslog.syslog(syslog.LOG_DEBUG, "Bad payload CRC in packet")
     if BAD_PACKET == False:
-        for byte in payload:
-            img_buffer.write(byte)
+        for i in range(0, bytes_sent):
+            img_buffer.write(list(payload)[i])
         next_packet += 1
     if last_pkt == True:
         next_packet = 0
