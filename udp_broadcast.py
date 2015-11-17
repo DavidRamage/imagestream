@@ -32,10 +32,10 @@ def get_image_chunks(byte_str):
         mystr += img_byte
         count += 1
         if count == 457:
-            byte_strings.append((mystr,count))
+            byte_strings.append((mystr, count))
             mystr = str()
             count = 0
-    byte_strings.append((mystr.ljust(457, '0'),count))
+    byte_strings.append((mystr.ljust(457, '0'), count))
     return byte_strings
 
 def get_packet(last_pkt, seq_num, bytes_sent, payload):
@@ -45,21 +45,22 @@ def get_packet(last_pkt, seq_num, bytes_sent, payload):
         return pkt_struct.pack(last_pkt, binascii.crc32(payload), seq_num,
             bytes_sent, payload)
     except Exception as ex:
-        syslog.syslog(syslog.LOG_ERR, "Unable to send packet due to %s" % str(ex))
+        syslog.syslog(syslog.LOG_ERR, "Unable to send packet due to %s" %\
+            str(ex))
 
 
 if __name__ == "__main__":
-    sock = socket(AF_INET, SOCK_DGRAM, 0)
-    sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-    sock.connect(('255.255.255.255', 31337))
+    SOCK = socket(AF_INET, SOCK_DGRAM, 0)
+    SOCK.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+    SOCK.connect(('255.255.255.255', 31337))
     while True:
-        file_buf = get_image()
-        byte_arrays = get_image_chunks(file_buf)
-        count = 0
-        for (byte_array, size) in byte_arrays:
+        FILE_BUF = get_image()
+        BYTE_ARRAYS = get_image_chunks(FILE_BUF)
+        COUNT = 0
+        for (byte_array, size) in BYTE_ARRAYS:
             last_pkt = 0
-            if count == len(byte_arrays) - 1:
+            if COUNT == len(BYTE_ARRAYS) - 1:
                 last_pkt = 1
-            sock.send(get_packet(last_pkt, count, size, byte_array))
-            count += 1
+            SOCK.send(get_packet(last_pkt, COUNT, size, byte_array))
+            COUNT += 1
         time.sleep(1)
